@@ -1,0 +1,7 @@
+# Tu configuración y tus datos no van al repositorio
+config.yaml
+skills/market-brief/config.yaml
+salida/
+*.local.*
+.DS_Store
+__pycache__/

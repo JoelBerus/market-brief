@@ -1,0 +1,41 @@
+# market-brief · configuración
+# Copia este archivo a ~/.config/market-brief/config.yaml (o define MARKET_BRIEF_CONFIG) y edítalo.
+# Todas las opciones: references/configuracion.md
+
+titulo: Mis inversiones            # nombre de la página y del correo
+zona_horaria: America/Guayaquil    # para fechas y "próxima nota"
+moneda: USD
+
+# Dónde viven tus datos: una subcarpeta por empresa (<datos>/<TICKER>/empresa.md, Historial.md, Reportes/)
+datos: ~/inversiones
+archivo_empresa: empresa.md        # p. ej. Contexto.md si usas una bóveda de Obsidian con otra convención
+
+# Opcional: archivo Markdown con una tabla de posiciones (Ticker | Acciones | Costo total | Meta …).
+# Si lo defines, acciones, costo y meta salen de ahí y no del archivo de cada empresa.
+portafolio: null
+
+# Opcional: nota diaria donde dejar un aviso cuando cambia el semáforo. {fecha} = AAAA-MM-DD
+diario: null
+
+# Qué recibes. Combina como quieras:
+#   solo web      -> web: html (o artifact),  correo: no
+#   solo correo   -> web: no,                 correo: si
+#   ambos         -> web: html (o artifact),  correo: si
+#   solo notas    -> web: no,                 correo: no   (todo queda en <datos>)
+canales:
+  web: html          # artifact (página en claude.ai, solo agentes Claude) | html (archivo estático, cualquier agente) | no
+  correo: si         # si | no
+
+web:
+  artifact_url: null                       # con web: artifact. Se llena al publicar la página por primera vez.
+  salida_html: ~/inversiones/web/index.html  # con web: html
+  url_publica: null                        # opcional: dónde publicas el HTML (GitHub Pages, Netlify…). Se usa en el botón del correo.
+
+correo:
+  para: tu-correo@ejemplo.com
+  por_defecto: siempre   # siempre | cambios (solo si cambia el semáforo, se cumple la meta o hay alerta) | nunca
+  herramienta: auto      # auto (Gmail u otro conector de correo del agente) | archivo (solo guarda el HTML en <datos>/salida/correo/)
+
+# Dónde buscar datos. {ticker} se reemplaza en minúsculas.
+fuentes:
+  - https://stockanalysis.com/stocks/{ticker}/

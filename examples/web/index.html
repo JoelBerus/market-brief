@@ -1,0 +1,385 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>
+<title>Mis inversiones</title>
+<!-- market-brief · https://github.com/JoelBerus/market-brief · Edita libremente: textos, colores (bloque :root) y secciones. Ver references/personalizar.md. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,400;0,500;0,650;0,750;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Release notes for each trading day: one documentation column, a diff gutter on the left, no boxes. */
+:root{
+  --page:#f4f5f7; --ink:#1c2330; --slate:#566072; --rule:#d8dce3;
+  --link:#1f6f8b; --mark:#ffe8a3; --on-mark:#1c2330;
+  --verde:#2f7a4f; --ambar:#94600d; --rojo:#ad3f37;
+  --prose:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --data:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --fs:17px; --big:1.75rem; --gut:2.25rem;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --page:#14181d; --ink:#e4e7eb; --slate:#9ba4b1; --rule:#2a3038;
+  --link:#73c2da; --mark:#e9cf6f; --on-mark:#14181d;
+  --verde:#7cc79a; --ambar:#e0b25e; --rojo:#ee8f86; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --page:#14181d; --ink:#e4e7eb; --slate:#9ba4b1; --rule:#2a3038;
+  --link:#73c2da; --mark:#e9cf6f; --on-mark:#14181d;
+  --verde:#7cc79a; --ambar:#e0b25e; --rojo:#ee8f86; color-scheme:dark}
+
+html{font-size:var(--fs);scrollbar-color:var(--rule) var(--page)}
+body{background:var(--page);color:var(--ink);font-family:var(--prose);font-size:1rem;line-height:1.65;margin:0;padding-inline:16px;padding-block:0 72px;caret-color:var(--link);-webkit-font-smoothing:antialiased}
+::selection{background:var(--mark);color:var(--on-mark)}
+.col{max-width:44rem;margin:0 auto}
+a{color:var(--link);text-decoration-thickness:1px;text-underline-offset:.2em}
+a:hover{text-decoration-thickness:2px}
+:focus-visible{outline:2px solid var(--link);outline-offset:3px;border-radius:2px}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+.d{font-family:var(--data);font-size-adjust:.53;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.sc{font-variant-caps:all-small-caps;letter-spacing:.06em;font-weight:650}
+.dim{color:var(--slate)}
+.mk.verde{color:var(--verde)} .mk.ambar{color:var(--ambar)} .mk.rojo{color:var(--rojo)}
+
+/* Top line: name, reading controls, company tabs */
+.top{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:10px 20px;padding-block:22px 0}
+.brand{font-weight:750;letter-spacing:-.01em}
+.tools{display:flex;flex-wrap:wrap;gap:6px 18px;color:var(--slate)}
+.opt{display:flex;gap:12px}
+.opt button{color:var(--slate);padding-block:2px;border-bottom:1px solid transparent}
+.opt button:hover{color:var(--ink)}
+.opt button[aria-pressed="true"]{color:var(--ink);font-weight:650;border-bottom-color:currentColor}
+.tabs{display:flex;gap:22px;overflow-x:auto;scrollbar-width:none;margin-top:18px;border-bottom:1px solid var(--rule)}
+.tabs button{flex:none;display:inline-flex;align-items:center;gap:7px;padding-block:8px 9px;color:var(--slate);border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs button:hover{color:var(--ink)}
+.tabs button[aria-current="true"]{color:var(--ink);font-weight:650;border-bottom-color:var(--ink)}
+
+/* Marks: hollow = far, half = close, full = target reached */
+.mk{width:.8em;height:.8em;flex:none;vertical-align:-.06em}
+
+/* The note */
+.note{padding-top:40px}
+h1{font-size:var(--big);line-height:1.22;font-weight:750;letter-spacing:-.02em;margin:0;text-wrap:balance;max-width:24em}
+.meta{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;margin:14px 0 0;color:var(--slate)}
+.plate{background:var(--ink);color:var(--page);padding:0 .45em;border-radius:3px;font-weight:650}
+.lead{margin:22px 0 0;max-width:62ch}
+h2{font-size:1rem;margin:0 0 14px;padding-left:var(--gut)}
+.sec{margin-top:48px}
+
+/* Diff gutter lists */
+.diff,.checks,.peers,.log,.index{list-style:none;margin:0;padding:0}
+.diff li,.checks li{display:grid;grid-template-columns:var(--gut) minmax(0,1fr);padding-block:10px;border-top:1px solid var(--rule)}
+.diff li:last-child,.checks li:last-child{border-bottom:1px solid var(--rule)}
+.g{font-family:var(--data);font-size-adjust:.53;font-weight:600;line-height:1.65;color:var(--slate)}
+.g.up,.g.down{color:var(--ink)}
+.diff p,.checks p{margin:0;max-width:62ch}
+.diff time{color:var(--slate);margin-right:8px}
+.checks .k{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px}
+.checks .gm{padding-top:.3em}
+
+/* Money paragraph + simulator */
+.money{margin:0;padding-left:var(--gut);max-width:calc(62ch + var(--gut))}
+.fig{font-weight:650}
+.fig del{color:var(--slate);font-weight:400;text-decoration-thickness:1px;margin-right:.35em}
+.fig ins{text-decoration:none;background-image:linear-gradient(var(--mark),var(--mark));background-repeat:no-repeat;background-position:0 88%;background-size:0 46%;transition:background-size .5s cubic-bezier(.16,1,.3,1),color .2s;padding-inline:1px}
+.sim-on .fig ins.chg{background-size:100% 100%;color:var(--on-mark)}
+.sim{margin-top:22px;padding-left:var(--gut)}
+.sim label{display:block;font-weight:650}
+.sim .row{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 16px;margin-top:6px}
+.track{position:relative;margin-top:14px}
+.track svg{position:absolute;inset:0;width:100%;height:28px;overflow:visible;pointer-events:none}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;margin:0;height:28px;background:transparent;cursor:pointer;display:block;position:relative}
+input[type=range]::-webkit-slider-runnable-track{height:2px;background:var(--ink)}
+input[type=range]::-moz-range-track{height:2px;background:var(--ink)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:6px;height:22px;border-radius:3px;background:var(--ink);border:2px solid var(--page);margin-top:-10px;box-sizing:content-box}
+input[type=range]::-moz-range-thumb{width:6px;height:20px;border-radius:3px;background:var(--ink);border:2px solid var(--page)}
+input[type=range]:focus-visible{outline:none}
+input[type=range]:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 3px var(--page),0 0 0 5px var(--link)}
+.stops{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:10px}
+.stops button{color:var(--slate);border-bottom:1px dotted var(--slate)}
+.stops button:hover{color:var(--ink);border-bottom-color:var(--ink)}
+.reset{color:var(--link);text-decoration:underline;text-underline-offset:.2em}
+.note-sm{margin:12px 0 0;color:var(--slate);max-width:62ch}
+
+/* Peers */
+.peers li{display:grid;grid-template-columns:var(--gut) minmax(0,1fr) auto;gap:0 0;padding-block:10px;border-top:1px solid var(--rule);align-items:baseline}
+.peers li:last-child{border-bottom:1px solid var(--rule)}
+.peers .who{min-width:0}
+.peers .who b{font-family:var(--data);font-size-adjust:.53;font-weight:600;margin-right:8px}
+.peers .num{text-align:right;white-space:nowrap}
+.peers .sub{grid-column:2/4;display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 16px;color:var(--slate)}
+.peers li.me .who{font-weight:650}
+.out{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.out svg{width:.75em;height:.75em}
+
+/* Past notes as a version log */
+.log li{display:grid;grid-template-columns:var(--gut) minmax(0,1fr);padding-block:10px;border-top:1px solid var(--rule)}
+.log li:last-child{border-bottom:1px solid var(--rule)}
+.log .h{display:flex;flex-wrap:wrap;gap:2px 14px;align-items:baseline}
+.log .marks{display:inline-flex;gap:5px;align-items:center}
+.log p{margin:0;color:var(--slate);max-width:62ch}
+
+/* Overview index */
+.index li{border-top:1px solid var(--rule)}
+.index li:last-child{border-bottom:1px solid var(--rule)}
+.index button{display:grid;grid-template-columns:var(--gut) minmax(0,1fr) auto;gap:2px 16px;width:100%;text-align:left;padding-block:14px;align-items:baseline}
+.index button:hover .t{text-decoration:underline;text-underline-offset:.2em}
+.index .t{font-weight:650}
+.index .t b{font-family:var(--data);font-size-adjust:.53;margin-right:8px}
+.index .h{grid-column:2;color:var(--slate)}
+.index .v{grid-row:1/3;grid-column:3;text-align:right}
+.index .v span{display:block;color:var(--slate)}
+
+footer{margin-top:56px;padding-left:var(--gut);color:var(--slate)}
+footer ul{list-style:none;margin:6px 0 16px;padding:0}
+footer p{margin:0 0 6px;max-width:62ch}
+.empty{padding-top:64px}
+.empty p{margin:10px 0 0;color:var(--slate);max-width:52ch}
+
+@media (max-width:560px){
+  :root{--gut:1.6rem;--big:1.5rem}
+  .peers li{grid-template-columns:var(--gut) minmax(0,1fr) auto}
+}
+@media (prefers-reduced-motion:reduce){.fig{transition:none}}
+</style>
+
+<div class="col">
+  <header class="top">
+    <div class="brand" id="brand">Mis inversiones</div>
+    <div class="tools">
+      <div class="opt" role="group" aria-label="Tema">
+        <button type="button" id="th-auto" data-theme-btn="auto" aria-pressed="true">Auto</button>
+        <button type="button" id="th-light" data-theme-btn="light" aria-pressed="false">Claro</button>
+        <button type="button" id="th-dark" data-theme-btn="dark" aria-pressed="false">Oscuro</button>
+      </div>
+      <div class="opt" role="group" aria-label="Tamaño del texto">
+        <button type="button" id="fs-down" data-size="-1" aria-label="Texto más pequeño">A−</button>
+        <button type="button" id="fs-up" data-size="1" aria-label="Texto más grande">A+</button>
+      </div>
+    </div>
+  </header>
+  <nav class="tabs" id="tabs" aria-label="Empresas"></nav>
+  <main id="view">
+    <div class="empty"><h1>Abriendo tus notas…</h1><p>Cada empresa publica aquí su nota del día en cuanto termina su reporte.</p></div>
+  </main>
+</div>
+
+<!-- Static mode: scripts/build_page.py replaces null with {"titulo", "empresas": [...], "reportes": [...]}. Leave null for the claude.ai artifact (db) mode. -->
+<script type="application/json" id="mb-data">{"titulo": "Mis inversiones (ejemplo)", "empresas": [{"ticker": "EJEM", "nombre": "Ejemplo Pagos S.A. (ficticia)", "mercado": "NASDAQ", "reporte": {"numero": 1, "fecha": "2026-10-06", "proxima": "miércoles 7 de octubre, 08:00"}, "titular": "Ejemplo: sube un poco, pero aún lejos de tu meta", "resumen": "Cerró en $16.40 y tus acciones valen $656.00, unos $56 más de lo que pagaste. Para tu meta de $800 tendría que subir 22%, y lo próximo son sus resultados del 30 de octubre.", "precio": 16.4, "posicion": {"acciones": 40, "costo": 600.0, "metaTotal": 800, "meta": 20.0, "ambar": 17.2, "cuenta": "Bróker de ejemplo"}, "semaforos": [{"cuando": "Hoy", "color": "rojo", "texto": "Está 18% por debajo de tu meta. Sigues 9% arriba de lo que pagaste."}, {"cuando": "Próxima semana", "color": "ambar", "texto": "Sin noticias propias; los analistas esperan en promedio $19.50."}, {"cuando": "30 de octubre, resultados", "color": "ambar", "texto": "Los resultados suelen mover el precio entre 5 y 10%."}], "escala": {"lo": 13, "hi": 25, "marcas": [{"p": 15.0, "t": "tu costo"}, {"p": 14.1, "t": "piso del año", "c": "rojo"}, {"p": 20.0, "t": "meta", "c": "verde", "fuerte": true}, {"p": 19.5, "t": "analistas", "punteada": true}, {"p": 23.8, "t": "techo del año"}]}, "noticias": [{"fecha": "2026-10-06", "titulo": "Ejemplo: lanza un producto nuevo.", "texto": "Noticia ficticia para mostrar el formato.", "signo": "+", "fuente": "Fuente de ejemplo", "url": "https://example.com/"}, {"fecha": "2026-10-02", "titulo": "Ejemplo: un analista baja su objetivo.", "texto": "Noticia ficticia.", "signo": "-", "fuente": "Fuente de ejemplo", "url": "https://example.com/"}], "comparables": {"titulo": "pagos · ejemplo", "lectura": "Ejemplo: OTRA va mejor este año.", "filas": [{"ticker": "EJEM", "nombre": "Ejemplo Pagos", "precio": 16.4, "mes": 3.0, "ytd": 5, "analistas": "mantener", "objetivo": 19.5, "url": "https://example.com/"}, {"ticker": "OTRA", "nombre": "Otra Fintech", "precio": 31.2, "mes": 6.1, "ytd": 22, "analistas": "comprar", "objetivo": 36.0, "url": "https://example.com/"}, {"ticker": "TERC", "nombre": "Tercera Banca", "precio": 9.85, "mes": -2.0, "ytd": -8, "analistas": "mantener", "objetivo": 11.0, "url": "https://example.com/"}]}, "fuentes": [{"t": "Fuente de ejemplo", "url": "https://example.com/"}]}], "reportes": [{"ticker": "EJEM", "fecha": "2026-10-06", "numero": 1, "cierre": 16.4, "dia": 0.8, "valor": 656.0, "vsCosto": 9.3, "faltaMeta": 22.0, "hoy": "rojo", "semana": "ambar", "evento": "ambar", "nota": "Ejemplo: primera nota"}]}</script>
+<script>
+(() => {
+  /* ---------- Reading preferences (this browser only) ---------- */
+  const root = document.documentElement, hostTheme = root.getAttribute('data-theme');
+  const store = { get: k => { try { return localStorage.getItem(k); } catch { return null; } },
+                  set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
+  const SIZES = [15, 16, 17, 18.5, 20, 22];
+  let sizeIdx = SIZES.indexOf(+store.get('mi-size')); if (sizeIdx < 0) sizeIdx = 2;
+  const applyTheme = t => {
+    if (t === 'auto') hostTheme ? root.setAttribute('data-theme', hostTheme) : root.removeAttribute('data-theme');
+    else root.setAttribute('data-theme', t);
+    document.querySelectorAll('[data-theme-btn]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.themeBtn === t)));
+  };
+  const applySize = () => {
+    root.style.setProperty('--fs', SIZES[sizeIdx] + 'px');
+    document.getElementById('fs-down').disabled = sizeIdx === 0;
+    document.getElementById('fs-up').disabled = sizeIdx === SIZES.length - 1;
+  };
+  document.querySelectorAll('[data-theme-btn]').forEach(b => b.addEventListener('click', () => { store.set('mi-theme', b.dataset.themeBtn); applyTheme(b.dataset.themeBtn); }));
+  document.querySelectorAll('[data-size]').forEach(b => b.addEventListener('click', () => {
+    sizeIdx = Math.min(SIZES.length - 1, Math.max(0, sizeIdx + +b.dataset.size)); store.set('mi-size', SIZES[sizeIdx]); applySize();
+  }));
+  applyTheme(store.get('mi-theme') || 'auto'); applySize();
+
+  /* ---------- Helpers ---------- */
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const usd = n => n == null ? 'n/d' : '$' + Number(n).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  const usd0 = n => usd(n).replace(/\.00$/, '');
+  const pct = (n, d = 1) => n == null ? 'n/d' : (n > 0 ? '+' : n < 0 ? '−' : '') + Math.abs(n).toFixed(d) + '%';
+  const day = (f, o = {weekday: 'long', day: 'numeric', month: 'long'}) => f ? new Date(f + 'T12:00:00').toLocaleDateString('es-EC', o) : '';
+  const norm = c => String(c || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').split(' ')[0];
+  const NAME = {verde: 'Verde', ambar: 'Ámbar', rojo: 'Rojo'};
+  const MEANS = {verde: 'meta alcanzada', ambar: 'cerca de la meta', rojo: 'lejos de la meta'};
+  const safeUrl = u => /^https:\/\//.test(u || '') ? esc(u) : '';
+  const mark = (c, label) => {
+    c = norm(c); const fill = c === 'verde' ? 'full' : c === 'ambar' ? 'half' : 'none';
+    return `<svg class="mk ${esc(c)}" viewBox="0 0 16 16" role="img" aria-label="${esc(label || NAME[c] || 'sin dato')}"><circle cx="8" cy="8" r="6.25" fill="${fill === 'full' ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.6"/>${fill === 'half' ? '<path d="M8 1.75a6.25 6.25 0 0 0 0 12.5z" fill="currentColor"/>' : ''}</svg>`;
+  };
+  const outIcon = '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M4.5 2.5h5v5M9.25 2.75 3 9" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const sign = n => n == null ? '' : n > 0 ? 'up' : n < 0 ? 'down' : '';
+
+  /* ---------- State ---------- */
+  let empresas = {}, reportes = [], current = null, loaded = false;
+  const view = document.getElementById('view'), tabs = document.getElementById('tabs');
+  const fromHash = () => (location.hash || '').slice(1).toUpperCase() || null;
+  const select = t => {
+    current = t;
+    try { history.replaceState(null, '', t ? '#' + t : location.pathname + location.search); } catch {}
+    render(); window.scrollTo({top: 0});
+  };
+  window.addEventListener('hashchange', () => { current = fromHash(); render(); });
+
+  function renderTabs(list){
+    if (!list.length) { tabs.innerHTML = ''; tabs.hidden = true; return; }
+    tabs.hidden = false;
+    const btn = (t, inner) => `<button type="button" data-t="${esc(t)}" aria-current="${String((current || '') === t)}">${inner}</button>`;
+    tabs.innerHTML = (list.length > 1 ? btn('', 'Todas') : '') +
+      list.map(e => btn(e.ticker, `${mark(e.semaforos?.[0]?.color)}<span class="d">${esc(e.ticker)}</span>`)).join('');
+    tabs.querySelectorAll('button').forEach(b => b.onclick = () => select(b.dataset.t || null));
+  }
+
+  function render(){
+    const list = Object.values(empresas).sort((a, b) => a.ticker.localeCompare(b.ticker));
+    if (list.length === 1) current = list[0].ticker;
+    if (current && !empresas[current] && loaded) current = null;
+    renderTabs(list);
+    if (!loaded) return;
+    if (!list.length) {
+      view.innerHTML = `<div class="empty"><h1>Todavía no hay notas</h1><p>Cuando corra el reporte diario de una empresa, su nota aparece aquí. Pídele a tu agente: «market-brief para SOFI» (cambia SOFI por tu empresa).</p></div>`;
+      return;
+    }
+    view.innerHTML = current ? detail(empresas[current]) : overview(list);
+    wire();
+  }
+
+  /* ---------- Todas: every company's latest note ---------- */
+  function overview(list){
+    const t = list.reduce((a, e) => { const p = e.posicion || {}; a.c += p.costo || 0; a.v += (p.acciones || 0) * (e.precio || 0); return a; }, {c: 0, v: 0});
+    const g = t.v - t.c, last = list.map(e => e.reporte?.fecha).sort().pop();
+    return `<div class="note">
+      <h1>Tus ${list.length} empresas</h1>
+      <p class="meta"><span>Notas al ${esc(day(last))}</span></p>
+      <p class="lead">Pusiste <b class="d">${usd(t.c)}</b> en total y hoy vale <b class="d">${usd(t.v)}</b>. Vas ${g >= 0 ? 'ganando' : 'perdiendo'} <b class="d">${usd(Math.abs(g))}</b> (${pct(g / t.c * 100)}).</p>
+      <section class="sec" aria-labelledby="h-idx"><h2 id="h-idx" class="sc">Última nota de cada una</h2>
+      <ul class="index">${list.map(e => {
+        const p = e.posicion || {}, v = (p.acciones || 0) * (e.precio || 0), f = p.meta && e.precio ? (p.meta / e.precio - 1) * 100 : null;
+        return `<li><button type="button" data-go="${esc(e.ticker)}">
+          <span class="gm">${mark(e.semaforos?.[0]?.color)}</span>
+          <span class="t"><b>${esc(e.ticker)}</b>${esc(e.nombre)}</span>
+          <span class="h">${esc(e.titular)}</span>
+          <span class="v d">${usd(v)}<span>${f > 0 ? 'falta ' + pct(f) : 'meta cumplida'}</span></span>
+        </button></li>`; }).join('')}</ul></section>
+      <footer><p>Semáforos según tus reglas. No es asesoría financiera; la decisión de vender es tuya.</p></footer>
+    </div>`;
+  }
+
+  /* ---------- One company's note ---------- */
+  function detail(e){
+    const p = e.posicion || {}, hoy = e.precio, n = e.noticias || [], cs = e.comparables?.filas || [];
+    const me = cs.find(r => r.ticker === e.ticker);
+    const hist = reportes.filter(r => r.ticker === e.ticker).sort((a, b) => b.fecha.localeCompare(a.fecha)).slice(0, 10);
+    const latest = !hist.length || hist[0].fecha === e.reporte?.fecha;
+    return `<article class="note">
+      <h1>${esc(e.titular)}</h1>
+      <p class="meta">${latest ? '<span class="plate">última</span>' : ''}<span>Nota <span class="d">${esc(e.reporte?.numero)}</span></span><span>${esc(e.nombre)} · ${esc(e.mercado)}: ${esc(e.ticker)}</span><span>${esc(day(e.reporte?.fecha))}</span></p>
+      <p class="lead">${esc(e.resumen)}</p>
+
+      ${n.length ? `<section class="sec" aria-labelledby="h-diff"><h2 id="h-diff" class="sc">Qué cambió</h2>
+      <ul class="diff">${n.map(x => { const s = x.signo === '+' ? 'up' : x.signo === '-' ? 'down' : ''; const u = safeUrl(x.url);
+        return `<li><span class="g ${s}" aria-hidden="true">${s === 'up' ? '+' : s === 'down' ? '−' : '·'}</span><p><time class="d" datetime="${esc(x.fecha)}">${esc(day(x.fecha, {day: 'numeric', month: 'short'}))}</time><b>${esc(x.titulo)}</b> ${esc(x.texto)}${u ? ` <a href="${u}" target="_blank" rel="noopener">${esc(x.fuente || 'Fuente')}</a>` : ''}</p></li>`; }).join('')}</ul></section>` : ''}
+
+      <section class="sec" aria-labelledby="h-checks"><h2 id="h-checks" class="sc">Cómo lo vemos</h2>
+      <ul class="checks">${(e.semaforos || []).map(s => { const c = norm(s.color);
+        return `<li><span class="gm">${mark(c)}</span><div><div class="k"><b>${esc(s.cuando)}</b><span class="dim">${esc(s.etiqueta || NAME[c] || s.color)}</span></div><p>${esc(s.texto)}</p></div></li>`; }).join('')}</ul></section>
+
+      <section class="sec" aria-labelledby="h-money"><h2 id="h-money" class="sc">Tu dinero</h2>
+      <p class="money" id="money">Tus <span class="d">${esc(p.acciones)}</span> acciones valen <b class="fig d" data-k="valor"></b> a <b class="fig d" data-k="precio"></b> cada una. Pagaste <span class="d">${usd(p.costo)}</span>, así que <span data-k="ganverb"></span> <b class="fig d" data-k="gan"></b>. <span data-k="meta"></span></p>
+      ${e.escala ? `<div class="sim" id="sim">
+        <label for="sim-range">Probar otro precio</label>
+        <div class="track"><svg id="ticks" aria-hidden="true"></svg><input id="sim-range" type="range" step="0.01" aria-describedby="sim-state"></div>
+        <div class="row"><span id="sim-state" aria-live="polite"></span><button type="button" class="reset" id="sim-reset" hidden>Volver al precio de hoy</button></div>
+        <div class="stops" id="stops" aria-label="Precios de referencia"></div>
+        <p class="note-sm">El color simulado solo mira el precio; el de hoy también considera noticias.</p>
+      </div>` : ''}</section>
+
+      ${cs.length ? `<section class="sec" aria-labelledby="h-peers"><h2 id="h-peers" class="sc">Otras empresas${e.comparables.titulo ? ` <span class="dim" style="font-variant-caps:normal;letter-spacing:0;font-weight:400">· ${esc(e.comparables.titulo)}</span>` : ''}</h2>
+      ${e.comparables.lectura ? `<p class="money" style="margin-bottom:14px">${esc(e.comparables.lectura)}</p>` : ''}
+      <ul class="peers">${cs.map(r => { const isMe = r.ticker === e.ticker, better = !isMe && me && r.ytd != null && me.ytd != null && r.ytd > me.ytd, u = safeUrl(r.url);
+        return `<li class="${isMe ? 'me' : ''}"><span class="g ${better ? 'up' : ''}" aria-hidden="true">${better ? '+' : isMe ? '›' : ''}</span>
+          <span class="who"><b>${esc(r.ticker)}</b>${esc(r.nombre)}</span><span class="num d">${usd(r.precio)}</span>
+          <span class="sub"><span>En el año <span class="d">${pct(r.ytd, 0)}</span>${r.analistas ? ` · analistas: ${esc(r.analistas)}${r.objetivo ? ' a <span class="d">' + usd(r.objetivo) + '</span>' : ''}` : ''}${better ? ` · le va mejor que ${esc(e.ticker)}` : ''}</span>${u ? `<a class="out" href="${u}" target="_blank" rel="noopener">Ver más ${outIcon}</a>` : ''}</span></li>`; }).join('')}</ul></section>` : ''}
+
+      ${hist.length ? `<section class="sec" aria-labelledby="h-log"><h2 id="h-log" class="sc">Notas anteriores</h2>
+      <ol class="log">${hist.map(r => `<li><span class="g" aria-hidden="true">${r.vsCosto >= 0 ? '+' : '−'}</span><div>
+        <div class="h"><span>Nota <span class="d">${esc(r.numero)}</span></span><time class="d" datetime="${esc(r.fecha)}">${esc(day(r.fecha, {day: 'numeric', month: 'short', year: 'numeric'}))}</time><span class="d">${usd(r.cierre)}</span><span class="d">${usd(r.valor)}</span>
+        <span class="marks" aria-label="Hoy, semana, evento">${mark(r.hoy, 'Hoy: ' + (NAME[norm(r.hoy)] || ''))}${mark(r.semana, 'Semana: ' + (NAME[norm(r.semana)] || ''))}${mark(r.evento, 'Evento: ' + (NAME[norm(r.evento)] || ''))}</span></div>
+        ${r.nota ? `<p>${esc(r.nota)}</p>` : ''}</div></li>`).join('')}</ol>
+      <p class="note-sm" style="padding-left:var(--gut)">El detalle de cada día queda en tus notas, en ${esc(e.ticker)}/Reportes. Pídele a tu agente cualquier fecha.</p></section>` : ''}
+
+      <footer>
+        ${(e.fuentes || []).length ? `<span class="sc">Fuentes</span><ul>${e.fuentes.map(f => safeUrl(f.url) ? `<li><a href="${safeUrl(f.url)}" target="_blank" rel="noopener">${esc(f.t)}</a></li>` : '').join('')}</ul>` : ''}
+        ${e.reporte?.proxima ? `<p>Próxima nota: ${esc(e.reporte.proxima)}.</p>` : ''}
+        <p>Semáforos según tus reglas. No es asesoría financiera; la decisión de vender es tuya.</p>
+      </footer>
+    </article>`;
+  }
+
+  /* ---------- Signature: one control rewrites the note's own figures ---------- */
+  function wire(){
+    view.querySelectorAll('[data-go]').forEach(b => b.onclick = () => select(b.dataset.go));
+    const money = document.getElementById('money'); if (!money) return;
+    const e = empresas[current], P = e.posicion || {}, hoy = e.precio;
+    const q = k => money.querySelector(`[data-k="${k}"]`);
+    const colorAt = x => x >= P.meta ? 'verde' : x >= P.ambar ? 'ambar' : 'rojo';
+    let first = true; const base = {};
+    function write(x){
+      const v = P.acciones * x, g = v - P.costo, f = (P.meta / x - 1) * 100;
+      const vals = {valor: usd(v), precio: usd(x), gan: `${usd(Math.abs(g))} (${pct(g / P.costo * 100)})`};
+      const sim = !first && Math.abs(x - hoy) > .004;
+      for (const k in vals) {
+        const el = q(k); if (first) el.innerHTML = '<del hidden></del><ins></ins>';
+        const [d, i] = el.children; i.textContent = vals[k]; d.textContent = base[k] || ''; d.hidden = !sim; i.classList.toggle('chg', sim);
+        if (first) base[k] = vals[k];
+      }
+      q('ganverb').textContent = g >= 0 ? 'vas ganando' : 'vas perdiendo';
+      q('meta').innerHTML = v >= P.metaTotal
+        ? `Superas tu meta de <span class="d">${usd0(P.metaTotal)}</span> por <b class="d">${usd(v - P.metaTotal)}</b>.`
+        : `Para tu meta de <span class="d">${usd0(P.metaTotal)}</span> faltan <b class="d">${usd(P.metaTotal - v)}</b>: el precio tendría que subir <b class="d">${pct(f)}</b>, hasta <span class="d">${usd(P.meta)}</span>.`;
+    }
+    write(hoy); first = false;
+    const range = document.getElementById('sim-range'); if (!range) return;
+    const S = e.escala, LO = Math.min(S.lo, Math.floor(hoy)), HI = Math.max(S.hi, Math.ceil(hoy));
+    range.min = LO; range.max = HI; range.value = hoy;
+    /* Ticks under the track, aligned to the thumb's travel (thumb 20px). */
+    const svg = document.getElementById('ticks'), NS = 'http://www.w3.org/2000/svg';
+    const stops = [{p: P.ambar, t: 'empieza ámbar', c: 'ambar'}, ...(S.marcas || []).filter(m => m.fuerte || /costo/i.test(m.t))].sort((a, b) => a.p - b.p);
+    function drawTicks(){
+      const w = svg.getBoundingClientRect().width || 600; svg.setAttribute('viewBox', `0 0 ${w} 28`); svg.innerHTML = '';
+      const x = p => 5 + (p - LO) / (HI - LO) * (w - 10);
+      const add = (tag, a) => { const n = document.createElementNS(NS, tag); for (const k in a) n.setAttribute(k, a[k]); svg.appendChild(n); };
+      stops.forEach(m => add('line', {x1: x(m.p), x2: x(m.p), y1: 8, y2: 20, stroke: 'var(--slate)', 'stroke-width': m.fuerte ? 2 : 1}));
+      add('circle', {cx: x(hoy), cy: 14, r: 4.5, fill: 'var(--link)'});
+    }
+    drawTicks();
+    if ('ResizeObserver' in window) new ResizeObserver(drawTicks).observe(svg);
+    const state = document.getElementById('sim-state'), reset = document.getElementById('sim-reset'), simBox = document.getElementById('sim');
+    function update(){
+      const x = +range.value, c = colorAt(x), at = Math.abs(x - hoy) < .005;
+      write(x); money.classList.toggle('sim-on', !at); reset.hidden = at;
+      state.innerHTML = `${mark(c)} ${at ? 'Hoy' : 'A ' + '<span class="d">' + usd(x) + '</span>'} el semáforo por precio queda en <b>${NAME[c]}</b>, ${MEANS[c]}${x < P.costo / P.acciones ? ', y por debajo de lo que pagaste' : ''}.`;
+    }
+    range.addEventListener('input', update);
+    reset.onclick = () => { range.value = hoy; update(); range.focus(); };
+    const box = document.getElementById('stops');
+    [{p: hoy, t: 'hoy'}, ...stops].sort((a, b) => a.p - b.p).forEach(m => {
+      const b = document.createElement('button'); b.type = 'button';
+      b.innerHTML = `${esc(m.t)} <span class="d">${usd(m.p)}</span>`;
+      b.onclick = () => { range.value = m.p; update(); }; box.appendChild(b);
+    });
+    update();
+  }
+
+  /* ---------- Data: embedded JSON (static page) or the artifact db (claude.ai) ---------- */
+  current = fromHash();
+  (async () => {
+    let fixed = null;
+    try { fixed = JSON.parse(document.getElementById('mb-data').textContent); } catch {}
+    if (fixed && Array.isArray(fixed.empresas)) {
+      if (fixed.titulo) { document.title = fixed.titulo; document.getElementById('brand').textContent = fixed.titulo; }
+      fixed.empresas.forEach(v => { if (v?.ticker) empresas[v.ticker] = v; });
+      reportes = (fixed.reportes || []).filter(Boolean); loaded = true; render(); return;
+    }
+    const db = window.claude?.use ? await window.claude.use('db') : null;
+    if (!db) { loaded = true; view.innerHTML = `<div class="empty"><h1>No pude abrir tus notas</h1><p>En claude.ai, abre esta página con tu cuenta. Fuera de claude.ai, genera la página con <code>scripts/build_page.py</code>.</p></div>`; return; }
+    let gotE = false, gotR = false;
+    const done = () => { if (gotE && gotR) { loaded = true; render(); } };
+    db.collection('empresas').onSnapshot(s => { empresas = {}; s.docs.forEach(d => { const v = d.data(); if (v?.ticker) empresas[v.ticker] = v; }); gotE = true; done(); }, () => { gotE = true; done(); });
+    db.collection('reportes').orderBy('fecha', 'desc').limit(400).onSnapshot(s => { reportes = s.docs.map(d => d.data()).filter(Boolean); gotR = true; done(); }, () => { gotR = true; done(); });
+  })();
+})();
+</script>
+
+</body></html>

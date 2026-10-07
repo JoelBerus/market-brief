@@ -1,0 +1,53 @@
+<!-- market-brief · correo de la nota diaria. Tablas + estilos inline (Gmail no ejecuta JS, SVG ni variables CSS).
+     Lo rellena scripts/render_email.py desde el documento JSON de la empresa (o tu agente, a mano, con las mismas reglas):
+       llaves dobles con un CAMPO                se reemplazan por texto (ya escapado)
+       comentarios repeat:x … /repeat:x          lo de adentro se repite una vez por elemento de la lista x
+       comentarios if:web … /if:web              lo de adentro se quita si el canal web está apagado (solo correo)
+     Edita libremente textos y colores. Paleta (ver DESIGN.md): page #f4f5f7 · ink #1c2330 · slate #566072 · rule #d8dce3 · link #1f6f8b.
+     Marcas del semáforo (Gmail no muestra SVG): rojo ○ #ad3f37 · ámbar ◐ #94600d · verde ● #2f7a4f. -->
+<div style="background:#f4f5f7;padding:24px 16px;font-family:'Public Sans',-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;font-size:16px;line-height:1.65;color:#1c2330">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto">
+<tr><td style="padding:0 0 16px;border-bottom:1px solid #d8dce3;font-weight:bold">{{TITULO}}</td></tr>
+
+<tr><td style="padding:28px 0 0;font-size:26px;line-height:1.22;font-weight:bold;letter-spacing:-0.02em;color:#1c2330">{{TITULAR}}</td></tr>
+<tr><td style="padding:12px 0 0;color:#566072"><span style="background:#1c2330;color:#f4f5f7;padding:0 6px;border-radius:3px;font-weight:bold">última</span>&nbsp; Nota <span style="font-family:'JetBrains Mono',Menlo,Consolas,monospace">{{NUM}}</span> · {{EMPRESA}} · {{FECHA_LARGA}}</td></tr>
+<tr><td style="padding:18px 0 0">{{RESUMEN}}</td></tr>
+
+<tr><td style="padding:36px 0 10px 32px;font-weight:bold;font-variant:small-caps;letter-spacing:0.06em">qué cambió</td></tr>
+<tr><td><table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+<!-- repeat:noticias -->
+<tr><td width="32" valign="top" style="padding:10px 0;border-top:1px solid #d8dce3;font-family:'JetBrains Mono',Menlo,Consolas,monospace;font-weight:bold">{{SIGNO}}</td>
+<td style="padding:10px 0;border-top:1px solid #d8dce3"><span style="font-family:'JetBrains Mono',Menlo,Consolas,monospace;color:#566072">{{FECHA}}</span>&nbsp; <b>{{TITULO_NOTICIA}}</b> <a href="{{URL}}" style="color:#1f6f8b">{{FUENTE}}</a></td></tr>
+<!-- /repeat:noticias -->
+</table></td></tr>
+
+<tr><td style="padding:36px 0 10px 32px;font-weight:bold;font-variant:small-caps;letter-spacing:0.06em">cómo lo vemos</td></tr>
+<tr><td><table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+<!-- repeat:semaforos -->
+<tr><td width="32" valign="top" style="padding:10px 0;border-top:1px solid #d8dce3;color:{{COLOR}}">{{MARCA}}</td>
+<td style="padding:10px 0;border-top:1px solid #d8dce3"><b>{{CUANDO}}</b> <span style="color:#566072">{{ETIQUETA}}</span><br>{{TEXTO}}</td></tr>
+<!-- /repeat:semaforos -->
+</table></td></tr>
+
+<tr><td style="padding:36px 0 10px 32px;font-weight:bold;font-variant:small-caps;letter-spacing:0.06em">tu dinero</td></tr>
+<tr><td style="padding:0 0 0 32px">{{DINERO}}</td></tr>
+
+<tr><td style="padding:36px 0 10px 32px;font-weight:bold;font-variant:small-caps;letter-spacing:0.06em">otras empresas</td></tr>
+<tr><td style="padding:0 0 12px 32px">{{LECTURA}}</td></tr>
+<tr><td><table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+<!-- repeat:comparables -->
+<tr><td width="32" valign="top" style="padding:10px 0;border-top:1px solid #d8dce3;font-family:'JetBrains Mono',Menlo,Consolas,monospace;font-weight:bold">{{GUTTER}}</td>
+<td style="padding:10px 0;border-top:1px solid #d8dce3"><b style="font-family:'JetBrains Mono',Menlo,Consolas,monospace">{{TICKER_C}}</b> {{NOMBRE_C}}<br><span style="color:#566072">En el año <span style="font-family:'JetBrains Mono',Menlo,Consolas,monospace">{{YTD}}</span> · analistas: {{ANALISTAS}}</span></td>
+<td align="right" valign="top" style="padding:10px 0;border-top:1px solid #d8dce3;white-space:nowrap"><span style="font-family:'JetBrains Mono',Menlo,Consolas,monospace">{{PRECIO_C}}</span><br><a href="{{URL_C}}" style="color:#1f6f8b">Ver más</a></td></tr>
+<!-- /repeat:comparables -->
+</table></td></tr>
+
+<!-- if:web -->
+<tr><td style="padding:32px 0 0 32px;border-top:1px solid #d8dce3">
+<a href="{{WEB_URL}}" style="color:#1f6f8b;font-weight:bold;text-decoration:underline">Leer la nota completa</a><br>
+<span style="color:#566072">Ahí están el simulador de precio, todas las noticias, tus notas anteriores y tus demás empresas.</span>
+</td></tr>
+<!-- /if:web -->
+<tr><td style="padding:24px 0 0 32px;color:#566072">Semáforos según tus reglas. No es asesoría financiera; la decisión de vender es tuya.</td></tr>
+</table>
+</div>
